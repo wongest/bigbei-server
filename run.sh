@@ -1,2 +1,2 @@
-cd /Users/workspace/code/bigbei-server
+cd /server/
 npm run serve
