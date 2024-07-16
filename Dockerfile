@@ -4,4 +4,4 @@ RUN mkdir server
 COPY ./ /server/
 RUN cd /server
 
-ENTRYPOINT ["node", "serve"]
+ENTRYPOINT ["npm", "serve"]

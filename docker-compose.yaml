@@ -3,4 +3,4 @@ services:
   bigbei-server:
     image: registry.cn-hangzhou.aliyuncs.com/bigbei-server/bigbei-server:master
     ports:
-      - 3032:8000
+      - 3032:3032
