@@ -4,4 +4,4 @@ RUN mkdir server
 COPY ./ /server/
 RUN cd /server/
 
-ENTRYPOINT ["/server/run.sh"]
+ENTRYPOINT ["sh", "/server/run.sh"]
