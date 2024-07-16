@@ -2,6 +2,6 @@ FROM node:latest
 RUN cd /
 RUN mkdir server
 COPY ./ /server/
-RUN cd /server/bigbei-server
+RUN cd /server/
 
-ENTRYPOINT ["npm", "serve"]
+ENTRYPOINT ["npm", "run", "serve"]
