@@ -9,12 +9,13 @@ import wxToken from './src/utils/wxToken'
 import Router from 'koa-router'
 import cors from 'koa-cors';
 import Api from './src/routes/index'
+import { MONGODB_USERNAME, MONGODB_PASSWORD } from './conf/key.json';
 
 import mongoose from 'mongoose'
 // 配置koa-body
 import koaBody from 'koa-body';
 
-const mongoURI = 'mongodb://admin:111111@116.205.239.86:27017/bigbei'
+const mongoURI = `mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@116.205.239.86:27017/bigbei`;
 
 
 const app = new Koa()

@@ -10,6 +10,8 @@ env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   AppID: ${{ secrets.AppID }}
   AppSecret: ${{ secrets.AppSecret }}
+  MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+  MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
   DOCKER_REGISTRY: registry.cn-hangzhou.aliyuncs.com
   DOCKER_REGISTRY_NAME_SPACE: bigbei-server
   REPO_NAME: bigbei-server
