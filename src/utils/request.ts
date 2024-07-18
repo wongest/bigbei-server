@@ -1,7 +1,6 @@
-const axios =  require("axios");
+import axios from "axios";
 
-const Api = axios.create({
-  baseURL: process.env.VUE_APP_API_BASE, // 域名配置，可添加变量配置文件定义
+const request = axios.create({
   headers: {
     "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
   },
@@ -24,16 +23,16 @@ function errorHandle(response) {
       break;
     // ...
     default:
-      throw new Error("未知错误");
+      throw new Error(response.data);
   }
 }
 // 成功处理函数
 
 function successHandle(response) {
-  return response.data;
+  return response;
 }
 // 请求拦截器
-Api.interceptors.request.use(
+request.interceptors.request.use(
   (config) => {
     return config;
   },
@@ -45,7 +44,7 @@ Api.interceptors.request.use(
   }
 );
 
-Api.interceptors.response.use(
+request.interceptors.response.use(
   (response) => {
     return successHandle(response);
   },
@@ -54,6 +53,6 @@ Api.interceptors.response.use(
   }
 );
 
-module.exports = Api;
+export default request;
 
 

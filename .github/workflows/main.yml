@@ -8,10 +8,12 @@ on: ["push", "pull_request"]
 env:
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  AppID: ${{ secrets.AppID }}
+  AppSecret: ${{ secrets.AppSecret }}
   DOCKER_REGISTRY: registry.cn-hangzhou.aliyuncs.com
   DOCKER_REGISTRY_NAME_SPACE: bigbei-server
   REPO_NAME: bigbei-server
-  
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -34,6 +36,12 @@ jobs:
         with:
           node-version: "14.17"
           cache: "npm"
+
+      - name: install envsub
+        run: npm install envsub -g
+
+      - name: set secret
+        run: envsub -d -a -s dollar-curly conf/key.json.temp conf/key.json
 
       - name: npm install
         run: npm install

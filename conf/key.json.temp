@@ -1,0 +1,4 @@
+{
+  "AppID": "${AppID}",
+  "AppSecret": "${AppSecret}"
+}

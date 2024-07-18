@@ -1,20 +1,29 @@
-const Koa = require('koa')
-const app = new Koa()
-const views = require('koa-views')
-const json = require('koa-json')
-const onerror = require('koa-onerror')
-const bodyparser = require('koa-bodyparser')
-const logger = require('koa-logger')
+import Koa from 'koa';
 
-// const mongoose = require('mongoose')
+import views from 'koa-views'
+import json from 'koa-json'
+import onerror from 'koa-onerror'
+import bodyparser from 'koa-bodyparser'
+import logger from 'koa-logger'
+import wxToken from './src/utils/wxToken'
+import Router from 'koa-router'
+import cors from 'koa-cors';
+import Api from './src/routes/index'
+
+import mongoose from 'mongoose'
 // 配置koa-body
-const koaBody = require('koa-body');
+import koaBody from 'koa-body';
+
+const mongoURI = 'mongodb://admin:111111@116.205.239.86:27017/bigbei'
+
+
+const app = new Koa()
 app.use(koaBody())
-const Router = require('koa-router')
+
 const router = new Router()
 
 // 跨域
-const cors = require('koa-cors');
+
 app.use(cors({
   origin: function (ctx) {
     return "*"; // 允许来自所有域名请求
@@ -46,28 +55,30 @@ app.use(views(__dirname + '/views', {
 }))
 
 // logger
-// app.use(async (ctx, next) => {
-//   const start = new Date()
-//   await next()
-//   const ms = new Date() - start
-//   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
-// })
+app.use(async (ctx, next) => {
+  const start = Date();
+  console.log(`${ctx.method} ${ctx.url} - ${start}`)
+  await next() 
+})
 
-const Api = require('./src/routes/index')
+
 const api = new Api()
 api.achieve(router)
 
 app.use(router.routes()).use(router.allowedMethods())
 
-// mongoose.connect(mongoURI,
-//   { useNewUrlParser: true, useUnifiedTopology: true }
-// )
-//   .then(() => {
-//     console.log('数据库连接')
-//   })
-//   .catch(err => {
-//     console.log(err)
-//   })
+
+mongoose.connect(mongoURI,
+  { useNewUrlParser: true, useUnifiedTopology: true }
+)
+  .then(() => {
+    console.log('数据库连接')
+    // 更新wx token
+    wxToken.init()
+  })
+  .catch(err => {
+    console.log(err)
+  })
 
 //设置端口
 const port = 3032;
@@ -81,5 +92,6 @@ app.listen(port, () => {
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
 });
+
 
 // module.exports = app
