@@ -48,9 +48,6 @@ jobs:
       - name: npm install
         run: npm install
 
-      - name: log file
-        run: tree ./
-
       - name: set-output branch name
         run: |
           branch_name=$(echo ${GITHUB_REF#refs/heads/}  | awk -F '/' '{print $NF}')
