@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx ts-node-dev app.ts",
-    "serve": "npx ts-node app.js",
+    "serve": "npx ts-node app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
