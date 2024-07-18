@@ -57,6 +57,11 @@ router.post("/openid/wx", async (ctx) => {
 router.post("/create", async (ctx) => {
   const { body } = ctx.request;
   const { openid, remark, phoneNumber } = body;
+  if (!openid || !remark || !remark) {
+    ctx.body = { msg: '缺少参数' };
+    ctx.status = 500;
+    return;
+  }
   const user = await UserModel.findOne({ openid });
   if (user) {
     ctx.status = 500;
