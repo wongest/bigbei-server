@@ -59,9 +59,17 @@ app.use(views(__dirname + '/views', {
 app.use(async (ctx, next) => {
   const start = Date();
   console.log(`${ctx.method} ${ctx.url} - ${start}`)
-  await next() 
-})
+  await next()
+});
 
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (e) {
+    ctx.status = 500;
+    ctx.body = { msg: e }
+  }
+})
 
 const api = new Api()
 api.achieve(router)

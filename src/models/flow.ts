@@ -1,12 +1,28 @@
 import mongoose from 'mongoose'
-const Schema = mongoose.Schema
+const Schema = mongoose.Schema;
 
-const flowSchema = new Schema({
-  creater: {
+export interface FlowType {
+  id: string;
+  createrId: string;
+  title: string;
+  description: string;
+  createTime: string;
+  reviewerId: string;
+  reviewTime?: string;
+  approved?: boolean;
+  reason?: string;
+}
+
+const flowSchema = new Schema<FlowType>({
+  id: {
     type: String,
-    require: true
+    require: true,
   },
-  reviewer: {
+  createrId: {
+    type: String,
+    require: true,
+  },
+  reviewerId: {
     type: String,
     require: true,
   },
@@ -20,6 +36,14 @@ const flowSchema = new Schema({
     type: String,
     require: false,
   },
+  approved: {
+    type: Boolean,
+    require: false,
+  },
+  reason: {
+    type: String,
+    require: false,
+  },
   title: {
     type: String,
     require: true,
@@ -30,4 +54,4 @@ const flowSchema = new Schema({
   },
 })
 
-export default mongoose.model('flow', flowSchema)
+export default mongoose.model<FlowType>('flow', flowSchema)
