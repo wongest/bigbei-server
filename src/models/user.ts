@@ -1,13 +1,25 @@
 import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
-const userSchema = new Schema({
+export interface UserType {
+  id: string;
+  openid: string;
+  phoneNumber: string;
+  remark: string;
+  createTime: string;
+}
+
+const userSchema = new Schema<UserType>({
+  id: {
+    type: String,
+    require: true
+  },
   openid: {
     type: String,
     require: true
   },
   phoneNumber: {
-    type: Number,
+    type: String,
     require: true
   },
   remark: {
@@ -21,4 +33,4 @@ const userSchema = new Schema({
   },
 })
 
-export default mongoose.model('wx_user', userSchema)
+export default mongoose.model<UserType>('wx_user', userSchema)

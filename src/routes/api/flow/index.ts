@@ -2,24 +2,25 @@ import Router from "koa-router";
 import request from '../../../utils/request';
 import UserModel from '../../../models/user';
 import FlowModel, { FlowType } from '../../../models/flow';
-import { uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { setUserInFlowList } from './utils';
+import cryptoJs from 'crypto-js';
+import { CRYPTO_SECRET_KET } from '../../../../conf/key.json';
 
 const router = new Router();
-
 
 /**
  * @description 获取本人的审阅
  */
 router.get("/approve", async (ctx) => {
   const request = ctx.request;
-  const openid = request.headers.cookie;
+  const openid = cryptoJs.AES.decrypt(request.headers.cookie, CRYPTO_SECRET_KET).toString(cryptoJs.enc.Utf8);
   const user = await
     UserModel.findOne({ openid });
   if (!user) {
     ctx.status = 401;
   } else {
-    const list = await FlowModel.find({ reviewerId: openid });
+    const list = await FlowModel.find({ reviewerId: user.id });
     ctx.body = await setUserInFlowList(list);
     ctx.status = 200;
   }
@@ -30,12 +31,12 @@ router.get("/approve", async (ctx) => {
  */
 router.get("/apply", async (ctx) => {
   const request = ctx.request;
-  const openid = request.headers.cookie;
+  const openid = cryptoJs.AES.decrypt(request.headers.cookie, CRYPTO_SECRET_KET).toString(cryptoJs.enc.Utf8);
   const user = await UserModel.findOne({ openid });
   if (!user) {
     ctx.status = 401;
   } else {
-    const list = await FlowModel.find({ createrId: openid })
+    const list = await FlowModel.find({ createrId: user.id })
     ctx.body = await setUserInFlowList(list);
     ctx.status = 200;
   }
@@ -47,7 +48,7 @@ router.get("/apply", async (ctx) => {
 router.post("/review:id", async (ctx) => {
   const request = ctx.request;
   const requestData = request.data;
-  const openid = request.headers.cookie;
+  const openid = cryptoJs.AES.decrypt(request.headers.cookie, CRYPTO_SECRET_KET).toString(cryptoJs.enc.Utf8);
   const user = await
     UserModel.findOne({ openid });
   if (!user) {
@@ -59,7 +60,6 @@ router.post("/review:id", async (ctx) => {
       approved: requestData.approved,
       reason: requestData.reason,
     });
-
     ctx.status = 200;
     ctx.body = newData;
   }
@@ -71,7 +71,7 @@ router.post("/review:id", async (ctx) => {
 router.post("/apply", async (ctx) => {
   const request = ctx.request;
   const requestData = request.data;
-  const openid = request.headers.cookie;
+  const openid = cryptoJs.AES.decrypt(request.headers.cookie, CRYPTO_SECRET_KET).toString(cryptoJs.enc.Utf8);
   const { phoneNumber, title, description } = requestData;
   const user = await
     UserModel.findOne({ openid });
@@ -84,10 +84,15 @@ router.post("/apply", async (ctx) => {
       return;
     }
     const reviewer = await UserModel.findOne({ phoneNumber });
+    if (!reviewer) {
+      ctx.status = 404;
+      ctx.body = { msg: '未找到审阅者' };
+      return;
+    }
     const data: FlowType = {
       id: uuidv4(),
-      createrId: openid,
-      reviewerId: reviewer.openid,
+      createrId: user.id,
+      reviewerId: reviewer.id,
       title,
       description,
       createTime: String(new Date()),
