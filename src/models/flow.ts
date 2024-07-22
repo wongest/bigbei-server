@@ -11,6 +11,7 @@ export interface FlowType {
   reviewTime?: string;
   approved?: boolean;
   reason?: string;
+  rate?: number;
 }
 
 const flowSchema = new Schema<FlowType>({
@@ -51,6 +52,10 @@ const flowSchema = new Schema<FlowType>({
   description: {
     type: String,
     require: true,
+  },
+  rate: {
+    type: Number,
+    require: false,
   },
 })
 

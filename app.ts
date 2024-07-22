@@ -66,8 +66,9 @@ app.use(async (ctx, next) => {
   try {
     await next();
   } catch (e) {
+    console.log(e.toString());
     ctx.status = 500;
-    ctx.body = { msg: e }
+    ctx.body = { msg: e.toString() }
   }
 })
 

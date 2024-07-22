@@ -15,8 +15,7 @@ const router = new Router();
 router.get("/approve", async (ctx) => {
   const request = ctx.request;
   const openid = cryptoJs.AES.decrypt(request.headers.cookie, CRYPTO_SECRET_KET).toString(cryptoJs.enc.Utf8);
-  const user = await
-    UserModel.findOne({ openid });
+  const user = await UserModel.findOne({ openid });
   if (!user) {
     ctx.status = 401;
   } else {
@@ -49,8 +48,7 @@ router.post("/review:id", async (ctx) => {
   const request = ctx.request;
   const requestData = request.data;
   const openid = cryptoJs.AES.decrypt(request.headers.cookie, CRYPTO_SECRET_KET).toString(cryptoJs.enc.Utf8);
-  const user = await
-    UserModel.findOne({ openid });
+  const user = await UserModel.findOne({ openid });
   if (!user) {
     ctx.status = 401;
   } else {
@@ -59,6 +57,7 @@ router.post("/review:id", async (ctx) => {
       reviewTime: String(new Date()),
       approved: requestData.approved,
       reason: requestData.reason,
+      rate: requestData.rate,
     });
     ctx.status = 200;
     ctx.body = newData;
@@ -70,23 +69,22 @@ router.post("/review:id", async (ctx) => {
  */
 router.post("/apply", async (ctx) => {
   const request = ctx.request;
-  const requestData = request.data;
+  const requestData = ctx.request.body;
   const openid = cryptoJs.AES.decrypt(request.headers.cookie, CRYPTO_SECRET_KET).toString(cryptoJs.enc.Utf8);
   const { phoneNumber, title, description } = requestData;
-  const user = await
-    UserModel.findOne({ openid });
+  const user = await UserModel.findOne({ openid });
   if (!user) {
     ctx.status = 401;
   } else {
     if (!phoneNumber || !title || !description) {
-      ctx.status = 500;
       ctx.body = { msg: '参数错误' };
+      ctx.status = 500;
       return;
     }
     const reviewer = await UserModel.findOne({ phoneNumber });
     if (!reviewer) {
-      ctx.status = 404;
       ctx.body = { msg: '未找到审阅者' };
+      ctx.status = 404;
       return;
     }
     const data: FlowType = {
