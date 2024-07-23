@@ -14,6 +14,9 @@ import { MONGODB_USERNAME, MONGODB_PASSWORD } from './conf/key.json';
 import mongoose from 'mongoose'
 // 配置koa-body
 import koaBody from 'koa-body';
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
 
 const mongoURI = `mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@116.205.239.86:27017/bigbei`;
 
@@ -93,8 +96,13 @@ mongoose.connect(mongoURI,
 //设置端口
 const port = 3032;
 
+const httpsOptions = {
+  key: fs.readFileSync(path.relative(__dirname, './certificate/www.bigbei.cn.key')),
+  cert: fs.readFileSync(path.relative(__dirname, './certificate/www.bigbei.cn.pem')),
+};
+
 //监听端口
-app.listen(port, () => {
+https.createServer(httpsOptions, app.callback()).listen(port, () => {
   console.log(`sever start on  ${port}`)
 })
 

@@ -23,6 +23,7 @@
     "bcryptjs": "^2.4.3",
     "crypto-js": "^3.3.0",
     "debug": "^4.1.1",
+    "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.7.0",
     "koa-body": "^4.2.0",
