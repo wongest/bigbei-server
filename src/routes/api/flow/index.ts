@@ -42,22 +42,43 @@ router.get("/apply", async (ctx) => {
 });
 
 /**
+ * @description 获取某个申请详情
+ */
+router.get("/review/:id", async (ctx) => {
+  const id = ctx.params.id;
+
+  const data = await FlowModel.findOne({ id }, '-_id');
+  if (data) {
+    ctx.body = data;
+    ctx.status = 200;
+  } else {
+    ctx.body = { msg: '未找到申请' };
+    ctx.status = 404;
+  }
+});
+
+/**
  * @description 审批
  */
-router.post("/review:id", async (ctx) => {
+router.post("/review/:id", async (ctx) => {
   const request = ctx.request;
-  const requestData = request.data;
+  const requestData = request.body;
   const openid = cryptoJs.AES.decrypt(request.headers.cookie, CRYPTO_SECRET_KET).toString(cryptoJs.enc.Utf8);
   const user = await UserModel.findOne({ openid });
   if (!user) {
     ctx.status = 401;
   } else {
+    const { approved, reason, rate } = requestData;
+    if (!approved || !reason || !rate) {
+      ctx.body = { msg: '参数错误' };
+      ctx.status = 500;
+    }
     const id = ctx.params.id;
     const newData = await FlowModel.updateOne({ id }, {
       reviewTime: String(new Date()),
-      approved: requestData.approved,
-      reason: requestData.reason,
-      rate: requestData.rate,
+      approved,
+      reason,
+      rate,
     });
     ctx.status = 200;
     ctx.body = newData;
@@ -99,6 +120,23 @@ router.post("/apply", async (ctx) => {
     await newFlow.save();
     ctx.body = data;
     ctx.status = 200;
+  }
+});
+
+/**
+ * @description 删除我的审批
+ */
+router.delete("/apply/:id", async (ctx) => {
+  const request = ctx.request;
+  const openid = cryptoJs.AES.decrypt(request.headers.cookie, CRYPTO_SECRET_KET).toString(cryptoJs.enc.Utf8);
+  const user = await UserModel.findOne({ openid });
+  if (!user) {
+    ctx.status = 401;
+  } else {
+    const id = ctx.params.id;
+    await FlowModel.deleteOne({ id });
+    ctx.status = 200;
+    ctx.body = { msg: 'success' };
   }
 });
 

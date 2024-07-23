@@ -4,6 +4,7 @@ import request from '../../utils/request';
 import UserModel, { UserType } from '../../models/user';
 import { AppID, AppSecret, CRYPTO_SECRET_KET } from '../../../conf/key.json';
 import { v4 as uuidv4 } from 'uuid';
+import { omit } from 'lodash';
 
 const router = new Router();
 
@@ -32,45 +33,35 @@ router.get("/", async (ctx) => {
   }
 });
 
-router.post("/openid/wx", async (ctx) => {
-  const { body } = ctx.request;
-  const { code } = body;
+const getOpenidByCode = async (code) => {
   const params = {
     appid: AppID,
     secret: AppSecret,
     js_code: code,
     grant_type: 'authorization_code',
   }
-  try {
-    const { data } = await request.get('https://api.weixin.qq.com/sns/jscode2session', { params })
-    const { openid } = data;
-    const user = await UserModel.findOne({ openid });
-    ctx.status = 200;
-    ctx.body = {
-      ...data,
-      auth: !!user,
-    };
-  } catch (err) {
-    ctx.status = 500;
-    ctx.body = err;
-  }
-});
+  const { data } = await request.get('https://api.weixin.qq.com/sns/jscode2session', { params })
+  const { openid } = data;
+  return openid;
+
+}
 
 router.post("/create", async (ctx) => {
-  const { body } = ctx.request;
-  const { openid, remark, phoneNumber } = body;
-  if (!openid || !remark || !remark) {
-    ctx.body = { msg: '缺少参数' };
-    ctx.status = 500;
-    return;
-  }
-  const user = await UserModel.findOne({ openid });
-  if (user) {
-    ctx.status = 500;
-    ctx.body = { msg: '用户已存在' };
-    return;
-  }
   try {
+    const { body } = ctx.request;
+    const { remark, phoneNumber, code } = body;
+    if (!remark || !phoneNumber || !code) {
+      ctx.body = { msg: '缺少参数' };
+      ctx.status = 500;
+      return;
+    }
+    const openid = await getOpenidByCode(code);
+    const user = await UserModel.findOne({ openid });
+    if (user) {
+      ctx.status = 500;
+      ctx.body = { msg: '用户已存在' };
+      return;
+    }
     const data: UserType = {
       id: uuidv4(),
       openid,
@@ -81,13 +72,44 @@ router.post("/create", async (ctx) => {
     const newUser = new UserModel(data)
     await newUser.save();
     ctx.status = 200;
-    ctx.body = data;
+    ctx.body = {
+      ...omit(data, ['openid']),
+      token: cryptoJs.AES.encrypt(openid, CRYPTO_SECRET_KET).toString(),
+    };
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = { err };
   }
-
 });
+
+router.post("/login", async (ctx) => {
+  const { body } = ctx.request;
+  const { code } = body;
+  if (!code) {
+    ctx.body = { msg: '缺少参数' };
+    ctx.status = 500;
+    return;
+  }
+  const openid = await getOpenidByCode(code);
+  const user = await UserModel.findOne({ openid }, '-openid -_id');
+  if (!user) {
+    ctx.status = 404;
+    ctx.body = { msg: '请注册', code: -1 };
+    return;
+  }
+  try {
+    ctx.status = 200;
+    ctx.body = {
+      ...user,
+      token: cryptoJs.AES.encrypt(openid, CRYPTO_SECRET_KET).toString(),
+    };
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = { err };
+  }
+});
+
 
 export default router.routes();
